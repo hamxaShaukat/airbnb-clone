@@ -19,15 +19,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <div className="flex flex-col">
-          <div>
+          {/* Make Navbar fixed */}
+          <div className="fixed w-full z-10">
             <Navbar />
           </div>
-          <div>
+          {/* Add padding to avoid overlapping */}
+          <div className="relative pt-[4rem]">
             {children}
           </div>
         </div>
-
       </body>
     </html>
   );
 }
+
