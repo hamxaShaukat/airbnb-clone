@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  email         String         @unique
+  name          String?
+  role          String?
+  hotels        Hotel[]
+  reviews       Review[]
+  notifications Notification[]
+}
+
+model Hotel {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  address       String
+  city          String
+  country       String
+  rooms         Int?
+  Bedrooms      Int?
+  Washrooms     Int?
+  description   String
+  priceRange    String
+  category      String
+  averageRating Float?
+  images        String[]
+  rules         String[]
+  facilities    String[]
+  adultRent     Int?
+  childrenRent  Int?
+  infantsRent   Int?
+  petRent       Int?
+  reviews       Review[]
+  user          User?    @relation(fields: [userId], references: [id])
+  userId        String   @db.ObjectId
+}
+
+model Review {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  hotelId   String   @db.ObjectId
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  hotel     Hotel    @relation(fields: [hotelId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  // hotelId     String @db.ObjectId
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

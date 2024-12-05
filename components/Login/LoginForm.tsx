@@ -5,36 +5,39 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Github, Facebook, Mail } from 'lucide-react'
+import Image from "next/image"
+
 const LoginForm = () => {
-    const [email, setEmail] = useState("")
-    const [isSignUp, setIsSignUp] = useState(false)
-  
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault()
-      // Handle login/signup logic here
-      console.log(`${isSignUp ? "Signing up" : "Logging in"} with email:`, email)
-    }
-  
-    const socialLoginVariants = {
-      hidden: { opacity: 0, y: 50 },
-      visible: (i: number) => ({
-        opacity: 1,
-        y: 0,
-        transition: {
-          delay: i * 0.1,
-          duration: 0.5,
-          ease: "easeOut",
-        },
-      }),
-    }
-  
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+  const [email, setEmail] = useState("")
+  const [isSignUp, setIsSignUp] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Handle login/signup logic here
+    console.log(`${isSignUp ? "Signing up" : "Logging in"} with email:`, email)
+  }
+
+  const socialLoginVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    }),
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md mx-auto"
         >
           <div className="bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
             <div className="p-8">
@@ -139,8 +142,33 @@ const LoginForm = () => {
             </motion.div>
           </div>
         </motion.div>
+
+        {/* Image Section */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="hidden lg:block"
+        >
+          <div className="relative h-full w-full rounded-2xl overflow-hidden">
+            <Image
+              src="/assets/login-form.jpg"
+              alt="Login background"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-2xl"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 mix-blend-multiply" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <h3 className="text-4xl font-bold text-white text-center px-6">
+                Join our community of innovators and creators
+              </h3>
+            </div>
+          </div>
+        </motion.div>
       </div>
-    )  
+    </div>
+  )
 }
 
 export default LoginForm
