@@ -30,6 +30,7 @@ import Image from "next/image";
 import ImageUpload from "../imageUpload";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 const formSteps = [
   { icon: Home, title: "Property Details" },
@@ -121,6 +122,7 @@ export default function AstonishingPropertyListingForm() {
       setFacilities(newFacilities);
     }
   };
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,6 +181,7 @@ export default function AstonishingPropertyListingForm() {
         title: "Property Listing Created Successfully",
         text: "Your property listing has been created!",
       })
+      router.push('/')
     } else if(response.status === 400){
       Swal.fire({
         icon: "error",

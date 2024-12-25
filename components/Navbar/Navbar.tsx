@@ -484,7 +484,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                     {session?.user.role === "host" ? (
                       <li>
                         <a
-                          href="#"
+                          href="/insights"
                           className="group flex items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-emerald-600 transition-all duration-300 ease-in-out"
                         >
                           <span>Insights</span>
