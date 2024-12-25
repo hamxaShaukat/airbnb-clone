@@ -47,18 +47,18 @@ import {
 } from "@/components/ui/select";
 import CategoryList from "@/constants/CategoryList";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { auth } from "@/auth";
 import { Session } from "next-auth";
+import { useRouter } from "next/navigation";
 
-export default function Navbar({
-  session
-}:{session:Session | null}) {
+export default function Navbar({ session }: { session: Session | null }) {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter()
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [roles,setRoles]=useState('');
+  const [roles, setRoles] = useState("");
   const [counts, setCounts] = useState({
     bedrooms: 0,
     bathrooms: 0,
@@ -66,6 +66,12 @@ export default function Navbar({
     guests: 0,
     pets: 0,
   });
+  const doLogOut = async () => {
+    await signOut();
+  };
+  const doLogin = async () =>{
+    router.push('/login');
+  }
 
   const features = {
     "Popular Amenities": [
@@ -93,8 +99,8 @@ export default function Navbar({
   };
 
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-  console.log('hhhhhhihihihih',session?.user)
- 
+  console.log("hhhhhhihihihih", session?.user);
+
   const toggleFeature = (feature: string) => {
     setSelectedFeatures((prev) =>
       prev.includes(feature)
@@ -460,31 +466,59 @@ export default function Navbar({
                     </li>
                     <li>
                       <a
-                        href={session?.user.role === 'host' ? '/listing':'/become-a-host'}
+                        href={
+                          session?.user.role === "host"
+                            ? "/listing"
+                            : "/become-a-host"
+                        }
                         className="group flex items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-emerald-600 transition-all duration-300 ease-in-out"
                       >
-                        <span>{session?.user.role==='guest'?'Become a host':"Host a hotel"}</span>
+                        <span>
+                          {session?.user.role === "guest"
+                            ? "Become a host"
+                            : "Host a hotel"}
+                        </span>
                         <ChevronRight className="ml-auto h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
                       </a>
                     </li>
-                  { session?.user.role ==='host'  ?  <li>
-                      <a
-                        href="#"
-                        className="group flex items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-emerald-600 transition-all duration-300 ease-in-out"
-                      >
-                        <span>Insights</span>
-                        <ChevronRight className="ml-auto h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </a>
-                    </li> :''}
+                    {session?.user.role === "host" ? (
+                      <li>
+                        <a
+                          href="#"
+                          className="group flex items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-emerald-600 transition-all duration-300 ease-in-out"
+                        >
+                          <span>Insights</span>
+                          <ChevronRight className="ml-auto h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
+                        </a>
+                      </li>
+                    ) : (
+                      ""
+                    )}
                     <li>
-                     { session? <a
-                        href="#"
-                        className="group flex gap-x-4 items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-emerald-600 transition-all duration-300 ease-in-out"
-                      >
-                        <Image src={session?.user?.image ?? ''} alt="logo" height={30} width={30} />
-                        <span>Log out</span>
-                        <LogOut className="ml-auto h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </a>:''}
+                      {session ? (
+                        <div
+                          className="group flex gap-x-4 items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white cursor-pointer hover:bg-emerald-600 transition-all duration-300 ease-in-out"
+                          onClick={doLogOut}
+                        >
+                          <Image
+                            src={session?.user?.image ?? ""}
+                            alt="logo"
+                            height={30}
+                            width={30}
+                          />
+                          <span>Log out</span>
+                          <LogOut className="ml-auto h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
+                        </div>
+                      ) : (
+                        <div
+                          className="group flex gap-x-4 items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white cursor-pointer hover:bg-emerald-600 transition-all duration-300 ease-in-out"
+                          onClick={doLogin}
+                        >
+                         
+                          <span>Log in</span>
+                          <LogOut className="ml-auto h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
+                        </div>
+                      )}
                     </li>
                   </ul>
 
