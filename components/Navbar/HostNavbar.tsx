@@ -9,7 +9,7 @@ const HostNavbar = (props: Props) => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
-            <a href="#" className="flex items-center">
+            <a href="/" className="flex items-center">
               <div className="relative w-10 h-10 mr-3">
                 <div className="absolute inset-0 bg-emerald-400 rounded-full animate-pulse"></div>
                 <svg

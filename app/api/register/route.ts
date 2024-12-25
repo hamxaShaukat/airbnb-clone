@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
         email,
         name,
         hashedPassword,
+        role: "guest",
       },
     });
 

@@ -42,7 +42,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -65,7 +65,7 @@ export default function Footer() {
               {[Facebook, Twitter, Instagram, Linkedin].map((Icon, index) => (
                 <a
                   key={index}
-                  href="#"
+                  href={'www.'+index+'.com'}
                   className="text-gray-400 hover:text-emerald-500 transition-colors duration-300"
                 >
                   <Icon size={24} />
@@ -73,33 +73,7 @@ export default function Footer() {
               ))}
             </motion.div>
           </div>
-          <div className="space-y-4">
-            <motion.h3
-              className="text-xl font-semibold"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              Quick Links
-            </motion.h3>
-            <motion.ul
-              className="space-y-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-            >
-              {["Home", "About Us", "Properties", "Blog", "Contact"].map((item, index) => (
-                <li key={index}>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-emerald-500 transition-colors duration-300"
-                  >
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </motion.ul>
-          </div>
+         
           <div className="space-y-4">
             <motion.h3
               className="text-xl font-semibold"
