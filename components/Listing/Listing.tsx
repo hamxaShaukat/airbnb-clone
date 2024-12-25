@@ -23,19 +23,26 @@ import {
   DollarSign,
   Users,
   Sparkles,
+  Images,
 } from "lucide-react";
 import CategoryList from "@/constants/CategoryList";
 import Image from "next/image";
+import ImageUpload from "../imageUpload";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const formSteps = [
   { icon: Home, title: "Property Details" },
   { icon: DollarSign, title: "Pricing" },
   { icon: Users, title: "Rules & Facilities" },
+  { icon: Images, title: "Gallery" },
   { icon: Sparkles, title: "Finalize" },
 ];
 
 export default function AstonishingPropertyListingForm() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [images, setimages] = useState<string[]>(Array(5).fill("")); // Initialize with 5 empty strings
+
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -45,7 +52,6 @@ export default function AstonishingPropertyListingForm() {
     numBedrooms: "",
     numWashrooms: "",
     description: "",
-    price: "",
     category: "",
     adultRent: "",
     infantRent: "",
@@ -71,7 +77,14 @@ export default function AstonishingPropertyListingForm() {
   const handleSwitchChange = (checked: boolean) => {
     setFormData((prev) => ({ ...prev, allowPets: checked }));
   };
-
+  // Function to update a specific logo by index
+  const updateLogo = (index: number, newLogo: string) => {
+    setimages((previmages) => {
+      const updatedimages = [...previmages]; // Create a copy of the current images array
+      updatedimages[index] = newLogo; // Update the specific index with the new logo
+      return updatedimages; // Return the updated array
+    });
+  };
   const handleDynamicFieldChange = (
     index: number,
     value: string,
@@ -109,9 +122,76 @@ export default function AstonishingPropertyListingForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", { ...formData, rules, facilities });
+    const name = formData.name
+    const address = formData.address
+    const city = formData.city
+    const country = formData.country
+    const rooms = formData.numRooms
+    const bedrooms = formData.numBedrooms
+    const washrooms = formData.numWashrooms
+    const description = formData.description
+    const category = formData.category
+    const adultRent = formData.adultRent
+    const infantRent = formData.infantRent
+    const childRent = formData.childRent
+    const petRent = formData.petRent
+ console.log(
+   'name:', name,
+    'address:', address,
+    'city:', city,
+    'country:', country,
+    'rooms:', rooms,
+    'bedrooms:', bedrooms,
+    'washrooms:', washrooms,
+    'description:', description,
+    'category:', category,
+    'adultRent:', adultRent,
+    'infantRent:', infantRent,
+    'childRent:', childRent,
+    'petRent:', petRent,
+    'images:', images,
+    'rules:', rules,
+    'facilities:', facilities
+  );
+    const response = await axios.post('/api/add-hotel',{
+      name,
+      address,
+      city,
+      country,
+      rooms,
+      bedrooms,
+      washrooms,
+      description,
+      category,
+      adultRent,
+      infantRent,
+      childRent,
+      petRent,
+      images,
+      rules,
+      facilities
+    });
+    if(response.status === 200){
+      Swal.fire({
+        icon: "success",
+        title: "Property Listing Created Successfully",
+        text: "Your property listing has been created!",
+      })
+    } else if(response.status === 400){
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Kindly Login first in order to list your property",
+      })
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "An error occurred while creating your property listing",
+      })
+    }
     // Handle form submission logic here
   };
 
@@ -317,18 +397,7 @@ export default function AstonishingPropertyListingForm() {
                       Pricing
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <Label htmlFor="price">Price per Night</Label>
-                        <Input
-                          id="price"
-                          name="price"
-                          type="number"
-                          value={formData.price}
-                          onChange={handleInputChange}
-                          required
-                          className="mt-1 bg-gray-600 border-gray-500 text-gray-100 placeholder-gray-400"
-                        />
-                      </div>
+                    
                       <div>
                         <Label htmlFor="adultRent">Adult Rent</Label>
                         <Input
@@ -489,6 +558,33 @@ export default function AstonishingPropertyListingForm() {
                 <Card className="bg-gray-700">
                   <CardContent className="p-6">
                     <h3 className="text-2xl font-semibold mb-4 text-emerald-400">
+                      Upload Images to showcase your home
+                    </h3>
+                    <p className="text-gray-300 mb-4">
+                      Kindly upload the best images of your hotel to attract
+                      more customers.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Array(5)
+                        .fill(null)
+                        .map((_, index) => (
+                          <div key={index}>
+                            <ImageUpload
+                              value={images[index]} // Assign the corresponding value from the images array
+                              onChange={(image) => updateLogo(index, image)} // Update the specific index
+                              label={`Upload logo ${index + 1}`} // Label the upload component
+                            />
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {currentStep === 4 && (
+                <Card className="bg-gray-700">
+                  <CardContent className="p-6">
+                    <h3 className="text-2xl font-semibold mb-4 text-emerald-400">
                       Finalize Listing
                     </h3>
                     <p className="text-gray-300 mb-4">
@@ -507,10 +603,6 @@ export default function AstonishingPropertyListingForm() {
                       <div>
                         <span className="font-semibold">Property Type:</span>{" "}
                         {formData.category}
-                      </div>
-                      <div>
-                        <span className="font-semibold">Price per Night:</span>{" "}
-                        ${formData.price}
                       </div>
                       <div>
                         <span className="font-semibold">Rooms:</span>{" "}
