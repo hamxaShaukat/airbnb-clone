@@ -4,18 +4,88 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Github, Mail } from "lucide-react";
+import { Contact, Github, KeyRound, Mail } from "lucide-react";
 import Image from "next/image";
 import { doSocialLogin } from "@/actions";
+import Swal from "sweetalert2";
+import axios from "axios";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login/signup logic here
-    console.log(`${isSignUp ? "Signing up" : "Logging in"} with email:`, email);
+    if (isSignUp) {
+      // console.log(email, password, name);
+      if (!email || !password || !name) {
+        console.log("first");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Please fill all the fields!",
+        });
+      }
+      const response = await axios.post("/api/register", {
+        email,
+        password,
+        name,
+      });
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Registration Successful",
+          text: "You can now login!",
+        });
+        setIsSignUp(false);
+      } else if (response.status === 400) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Email already exists!",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+      }
+    } else {
+      // console.log(email, password);
+      if (!email || !password) {
+        console.log("second");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Please fill all the fields!",
+        });
+      }
+      try {
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirectTo: "/",
+        });
+        if (result?.error) {
+          console.log(result.error);
+        } else {
+          Swal.fire({
+            icon: "success",
+            title: "Login Successful",
+            text: "Welcome! Redirecting you to the place of wisdom and leisure...",
+          });
+          router.push("/");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
   };
 
   const socialLoginVariants = {
@@ -51,7 +121,7 @@ const LoginForm = () => {
                 {isSignUp ? "Create Account" : "Welcome Back"}
               </motion.h2>
               <div className="space-y-8 mb-8">
-                <form  className="" action={doSocialLogin}>
+                <form className="" action={doSocialLogin}>
                   <motion.div
                     initial="hidden"
                     animate="visible"
@@ -120,20 +190,75 @@ const LoginForm = () => {
                   transition={{ delay: 0.5, duration: 0.5 }}
                   className="space-y-4"
                 >
-                  <div className="relative">
-                    <Input
-                      type="email"
-                      placeholder="Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-emerald-500 focus:border-emerald-500"
-                      required
-                    />
-                    <Mail
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                      size={20}
-                    />
-                  </div>
+                  {isSignUp ? (
+                    <div className="flex flex-col space-y-2">
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="Name"
+                          onChange={(e) => setName(e.target.value)}
+                          className="w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                        <Contact
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                          size={20}
+                        />
+                      </div>
+                      <div className="relative">
+                        <Input
+                          type="email"
+                          placeholder="Email"
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                        <Mail
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                          size={20}
+                        />
+                      </div>
+                      <div className="relative">
+                        <Input
+                          type="password"
+                          placeholder="password"
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                        <KeyRound
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                          size={20}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col space-y-2">
+                      <div className="relative">
+                        <Input
+                          type="email"
+                          placeholder="Email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                        <Mail
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                          size={20}
+                        />
+                      </div>
+                      <div className="relative">
+                        <Input
+                          type="password"
+                          placeholder="password"
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                        <KeyRound
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                          size={20}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"

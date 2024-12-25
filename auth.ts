@@ -2,6 +2,8 @@ import prisma from "@/lib/prismadb";
 import NextAuth from "next-auth";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import bcrypt from "bcryptjs";
+import Credentials from "next-auth/providers/credentials";
 
 export const {
   handlers: { GET, POST },
@@ -32,6 +34,52 @@ export const {
         },
       },
     }),
+    Credentials({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials, req) {
+        const email = credentials.email as string;
+        const password = credentials.password as string;
+
+        console.log("Authorize called with email:", email);
+
+        if (!email || !password) {
+          console.log("Missing email or password");
+          throw new Error("Missing email or password");
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (!user) {
+          console.log("No user found with the email:", email);
+          throw new Error("No user found with the email");
+        }
+
+        const isPasswordValid = await bcrypt.compare(
+          password,
+          user.hashedPassword
+        );
+        if (!isPasswordValid) {
+          console.log("Invalid password for email:", email);
+          throw new Error("Invalid password");
+        }
+
+        console.log("User authenticated:", user);
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+
+          role: user.role || "guest", // Provide a default value if role is null
+          avatar: user.avatar || "",
+        };
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
@@ -49,7 +97,8 @@ export const {
           token.name = updatedUser.name;
           token.email = updatedUser.email;
           token.role = updatedUser.role;
-          console.log(token.role,token.name,token.email)
+          token.avatar = updatedUser.avatar;
+          // console.log(token.role,token.name,token.email)
         }
       }
       return token;
@@ -60,12 +109,11 @@ export const {
         session.user.name = token.name as string;
         session.user.email = token.email as string;
         session.user.role = token.role as string;
+        session.user.avatar = token.avatar as string;
       }
       return session;
     },
     async signIn({ user, account, profile, email, credentials }) {
-   
-
       if (!account) {
         console.log("signIn callback - no account");
         return false;
@@ -89,7 +137,8 @@ export const {
             data: {
               email,
               name,
-              role:'false',
+              hashedPassword: "",
+              role: "guest",
             },
           });
         } else {
@@ -102,7 +151,6 @@ export const {
         }
         user.role = existingUser.role;
       }
-      
 
       console.log("signIn callback - successful");
       return true;
