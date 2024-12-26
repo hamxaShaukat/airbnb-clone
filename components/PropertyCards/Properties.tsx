@@ -85,7 +85,7 @@ const Properties = () => {
     const timeout = setTimeout(() => {
       setTimeoutError(true);
       setLoading(false);
-    }, 25000);
+    }, 55000);
 
     try {
       const response = await axios.get("/api/hotels");

@@ -16,6 +16,10 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Hotel } from "@/types/types";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { ClipLoader } from "react-spinners";
+import { useRouter } from "next/navigation";
 
 // Dummy data
 const dummyHotel: Hotel = {
@@ -55,9 +59,8 @@ const SinglePropertyCard = ({
   const [isHovered, setIsHovered] = useState(false);
   const controls = useAnimation();
   const cardRef = useRef<HTMLDivElement | null>(null);
-
-  const [loading, setLoading] = useState<boolean>(true);
-  const [timeoutError, setTimeoutError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   useEffect(() => {
     // Removed useEffect hook
   }, []);
@@ -74,6 +77,92 @@ const SinglePropertyCard = ({
   if (property.averageRating === undefined) {
     return;
   }
+  const handleFvrtLogic = async (id: string) => {
+    setIsLoading(true); // Show loader
+    try {
+      const response = await axios.post("/api/add-to-fvrt", { id });
+  
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Added to Favorites",
+          text: "This property has been added to your favorites",
+        });
+      }
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        const { message, code } = error.response.data;
+  
+        switch (code) {
+          case 801:
+            Swal.fire({
+              icon: "warning",
+              title: "Cannot Add to Favorites",
+              text: message, 
+            });
+            break;
+  
+          case 802:
+            Swal.fire({
+              icon: "error",
+              title: "Authorization Error",
+              text: message || "You need to log in to add properties to favorites.",
+            });
+            router.push("/login"); // Redirect to login page if not logged in
+            break;
+  
+          case 803:
+            Swal.fire({
+              icon: "info",
+              title: "Already in Favorites",
+              text: message || "This property is already in your favorites list.",
+            });
+            break;
+  
+          case 4041:
+            Swal.fire({
+              icon: "error",
+              title: "Hotel Not Found",
+              text: message || "The property you are trying to add does not exist.",
+            });
+            break;
+  
+          case 4042:
+            Swal.fire({
+              icon: "error",
+              title: "User Not Found",
+              text: message || "Your account could not be located. Please try again.",
+            });
+            break;
+  
+          case 4001:
+            Swal.fire({
+              icon: "warning",
+              title: "Invalid Data",
+              text: message || "Hotel ID is required to add to favorites.",
+            });
+            break;
+  
+          default:
+            Swal.fire({
+              icon: "error",
+              title: "Unexpected Error",
+              text: message || "An unexpected error occurred. Please try again.",
+            });
+        }
+      } else {
+        // Handle network or other unexpected errors
+        Swal.fire({
+          icon: "error",
+          title: "Network Error",
+          text: "A network issue occurred. Please check your connection and try again.",
+        });
+      }
+    } finally {
+      setIsLoading(false); // Hide loader
+    }
+  };
+  
 
   return (
     <motion.div
@@ -101,10 +190,10 @@ const SinglePropertyCard = ({
             className="absolute top-4 right-4 text-white hover:text-emerald-500 transition-colors duration-300"
             onClick={(e) => {
               e.preventDefault();
-              // Add to favorites logic here
+              handleFvrtLogic(property.id)
             }}
           >
-            <Heart className="h-6 w-6" />
+          {isLoading ?  <ClipLoader className="h-6 w-6" /> : <Heart className="h-6 w-6" />}
           </Button>
           <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
             <Button
