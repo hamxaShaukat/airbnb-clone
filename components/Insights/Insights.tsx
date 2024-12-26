@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2 } from "lucide-react";
+import { Trash2, RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,31 +11,102 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { ClipLoader } from "react-spinners";
+import Image from "next/image";
+import { Hotel } from "@/types/types";
 
-interface Hotel {
-  id: string;
-  name: string;
-}
+const FallbackUI = ({ onReload }: { onReload: () => void }) => {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 overflow-hidden">
+      <motion.div
+        className="absolute inset-0 z-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute bg-emerald-500 rounded-full"
+            style={{
+              width: Math.random() * 20 + 5,
+              height: Math.random() * 20 + 5,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.3, 0.8, 0.3],
+            }}
+            transition={{
+              duration: Math.random() * 3 + 2,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          />
+        ))}
+      </motion.div>
+      <motion.div
+        className="z-10 text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <motion.h1
+          className="text-4xl font-bold text-white mb-4"
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          Oops! Taking longer than expected.
+        </motion.h1>
+        <p className="text-xl text-emerald-400 mb-8">
+          The page is taking a while to load. Kindly check your internet connection and try again, or Please try reloading.
+        </p>
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Button
+            variant="default"
+            size="lg"
+            onClick={onReload}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl"
+          >
+            <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
+            Reload Page
+          </Button>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
 
 export default function Insights() {
   const [hotelToDelete, setHotelToDelete] = useState<Hotel | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [hotels, setHotels] = useState<Hotel[]>([]); // State for hotels
-  const [error, setError] = useState<string | null>(null); // State for error
-  const [loading, setLoading] = useState<boolean>(true); // Loading state for fetching
-  const [deleting, setDeleting] = useState<boolean>(false); // Loading state for deletion
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [deleting, setDeleting] = useState<boolean>(false);
+  const [timeoutError, setTimeoutError] = useState<boolean>(false);
 
   const fetchHotels = async () => {
-    setLoading(true); // Show global loader
+    setLoading(true);
+    setTimeoutError(false);
+
+    const timeout = setTimeout(() => {
+      setTimeoutError(true);
+      setLoading(false);
+    }, 25000);
+
     try {
       const response = await axios.get("/api/hotels");
+      clearTimeout(timeout);
       if (response.status === 200) {
-        setHotels(response.data); // Store the hotels in state
+        setHotels(response.data);
       } else {
         console.error("Failed to fetch hotels, status:", response.status);
         setError("Failed to fetch hotels.");
@@ -44,12 +115,13 @@ export default function Insights() {
       console.error("Error while fetching hotels:", err);
       setError("An error occurred while fetching hotels.");
     } finally {
-      setLoading(false); // Hide global loader
+      setLoading(false);
+      clearTimeout(timeout);
     }
   };
 
   const handleDeleteClick = async (id: string) => {
-    setDeleting(true); // Show delete loader
+    setDeleting(true);
     try {
       const response = await axios.delete("/api/delete-hotel", {
         data: { id: id },
@@ -61,7 +133,7 @@ export default function Insights() {
           showConfirmButton: false,
           timer: 1500,
         });
-        setHotels((prevHotels) => prevHotels.filter((h) => h.id !== id)); // Update state
+        setHotels((prevHotels) => prevHotels.filter((h) => h.id !== id));
       } else {
         Swal.fire({
           icon: "error",
@@ -78,14 +150,18 @@ export default function Insights() {
         timer: 1500,
       });
     } finally {
-      setDeleting(false); // Hide delete loader
+      setDeleting(false);
       setIsDialogOpen(false);
     }
   };
 
   useEffect(() => {
-    fetchHotels(); // Fetch hotels on component mount
+    fetchHotels();
   }, []);
+
+  if (timeoutError) {
+    return <FallbackUI onReload={() => window.location.reload()} />;
+  }
 
   return (
     <div className="p-4 bg-gray-900 min-h-screen">
@@ -108,7 +184,16 @@ export default function Insights() {
                 transition={{ duration: 0.3 }}
                 className="flex items-center justify-between bg-gray-800 p-4 rounded-lg"
               >
-                <span className="text-lg text-white">{hotel.name}</span>
+                <div className="flex gap-x-4">
+                  <Image
+                    src={hotel.images[0]}
+                    alt="logo"
+                    height={40}
+                    width={40}
+                    className="rounded-md"
+                  />
+                  <span className="text-lg text-white capitalize">{hotel.name}</span>
+                </div>
                 <Button
                   variant="destructive"
                   size="sm"
@@ -149,11 +234,7 @@ export default function Insights() {
               onClick={() => handleDeleteClick(hotelToDelete!.id)}
               disabled={deleting}
             >
-              {deleting ? (
-                <ClipLoader color="#fff" size={15} />
-              ) : (
-                "Delete"
-              )}
+              {deleting ? <ClipLoader color="#fff" size={15} /> : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

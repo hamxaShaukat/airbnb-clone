@@ -642,14 +642,14 @@ export default function AstonishingPropertyListingForm() {
               >
                 Next
               </Button>
-            ) : (
+            ) : currentStep === 4 ? (
               <Button
                 type="submit"
                 className="bg-emerald-500 text-white hover:bg-emerald-600"
               >
                 Submit Listing
               </Button>
-            )}
+            ):null}
           </div>
         </form>
       </motion.div>

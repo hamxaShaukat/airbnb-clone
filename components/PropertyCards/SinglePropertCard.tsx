@@ -1,11 +1,21 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { motion, useAnimation } from "framer-motion"
-import { Heart, Star, ChevronLeft, ChevronRight, MapPin, Bed, Bath, Home } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import { Hotel } from "@/types/types"
+import { useState, useRef, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
+import {
+  Heart,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Bed,
+  Bath,
+  Home,
+  RefreshCw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Hotel } from "@/types/types";
 
 // Dummy data
 const dummyHotel: Hotel = {
@@ -17,7 +27,8 @@ const dummyHotel: Hotel = {
   rooms: 50,
   Bedrooms: 2,
   Washrooms: 2,
-  description: "Experience luxury by the sea in our stunning resort. Enjoy breathtaking ocean views, world-class amenities, and unparalleled comfort.",
+  description:
+    "Experience luxury by the sea in our stunning resort. Enjoy breathtaking ocean views, world-class amenities, and unparalleled comfort.",
   category: "Resort",
   averageRating: 4.8,
   images: [
@@ -33,25 +44,35 @@ const dummyHotel: Hotel = {
   petRent: 30,
   reviews: [],
   userEmail: "host@example.com",
-}
+};
 
-const SinglePropertyCard = ({ property = dummyHotel }: { property?: Hotel }) => {
-  const [currentImage, setCurrentImage] = useState(0)
-  const [isHovered, setIsHovered] = useState(false)
-  const controls = useAnimation()
-  const cardRef = useRef<HTMLDivElement | null>(null)
+const SinglePropertyCard = ({
+  property = dummyHotel,
+}: {
+  property?: Hotel;
+}) => {
+  const [currentImage, setCurrentImage] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const controls = useAnimation();
+  const cardRef = useRef<HTMLDivElement | null>(null);
 
-
+  const [loading, setLoading] = useState<boolean>(true);
+  const [timeoutError, setTimeoutError] = useState<boolean>(false);
   useEffect(() => {
     // Removed useEffect hook
-  }, [])
+  }, []);
 
   const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % property.images.length)
-  }
+    setCurrentImage((prev) => (prev + 1) % property.images.length);
+  };
 
   const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + property.images.length) % property.images.length)
+    setCurrentImage(
+      (prev) => (prev - 1 + property.images.length) % property.images.length
+    );
+  };
+  if (property.averageRating === undefined) {
+    return;
   }
 
   return (
@@ -79,7 +100,7 @@ const SinglePropertyCard = ({ property = dummyHotel }: { property?: Hotel }) => 
             size="icon"
             className="absolute top-4 right-4 text-white hover:text-emerald-500 transition-colors duration-300"
             onClick={(e) => {
-              e.preventDefault()
+              e.preventDefault();
               // Add to favorites logic here
             }}
           >
@@ -107,22 +128,24 @@ const SinglePropertyCard = ({ property = dummyHotel }: { property?: Hotel }) => 
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-2xl font-bold text-white mb-2">{property.name}</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {property.name}
+              </h3>
               <p className="text-emerald-400 flex items-center">
                 <MapPin className="h-4 w-4 mr-1" />
                 {property.city}, {property.country}
               </p>
             </div>
-            {property.averageRating && (
-              <div className="flex items-center bg-emerald-500 rounded-full px-3 py-1">
-                <Star className="h-4 w-4 text-yellow-600 mr-1" />
-                <span className="text-white font-bold">{property.averageRating.toFixed(1)} 
-             
-                </span>
-              </div>
-            )}
+
+            <div className="flex items-center bg-emerald-500 rounded-full px-3 py-1">
+              <span className="text-white font-bold">
+                {property.averageRating.toFixed(1)} ⭐
+              </span>
+            </div>
           </div>
-          <p className="text-gray-400 mb-4 line-clamp-2">{property.description}</p>
+          <p className="text-gray-400 mb-4 line-clamp-2">
+            {property.description}
+          </p>
           <div className="flex flex-wrap gap-4 mb-4">
             {property.rooms && (
               <span className="flex items-center text-emerald-300">
@@ -150,7 +173,9 @@ const SinglePropertyCard = ({ property = dummyHotel }: { property?: Hotel }) => 
           </div>
           <div className="flex justify-between items-center">
             <div>
-              <span className="text-2xl font-bold text-white">${property.adultRent}</span>
+              <span className="text-2xl font-bold text-white">
+                ${property.adultRent}
+              </span>
               <span className="text-gray-400 text-sm"> / night</span>
             </div>
             <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 transition-all duration-300">
@@ -160,7 +185,7 @@ const SinglePropertyCard = ({ property = dummyHotel }: { property?: Hotel }) => 
         </div>
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default SinglePropertyCard
+export default SinglePropertyCard;
