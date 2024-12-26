@@ -78,23 +78,21 @@ const Properties = () => {
   const [error, setError] = useState<string | null>(null); // State for error
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   const [timeoutError, setTimeoutError] = useState<boolean>(false);
-  const [fvrtList, setFvrtList] = useState('')
+  const [fvrtList, setFvrtList] = useState([])
 
-  const fetchFvrts=async () =>{
+  const fetchFvrts = async () => {
     try {
       const response = await axios.get("/api/get-fvrt");
-      if (response.status === 200) {
-        setFvrtList(response.data);
-        
+      if (response.status === 200 && response.data && Array.isArray(response.data.favorites)) {
+        setFvrtList(response.data.favorites);
       } else {
-        
-        setError("Failed to fetch favourites.");
+        setError("Failed to fetch favorites.");
       }
     } catch (err) {
-      
-      setError("An error occurred while fetching favourites.");
+      setError("An error occurred while fetching favorites.");
     }
-  }
+  };
+  
 
 
   const fetchHotels = async () => {
@@ -123,6 +121,7 @@ const Properties = () => {
       clearTimeout(timeout);
     }
   };
+  console.log('first',fvrtList)
 
   useEffect(() => {
     fetchFvrts(); // Fetch favourites on component mount
@@ -146,7 +145,7 @@ const Properties = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {hotels.map((property, index) => (
-            <SinglePropertCard key={index} property={property} />
+            <SinglePropertCard key={index} property={property} favorites={fvrtList} />
           ))}
         </div>
       )}

@@ -63,7 +63,7 @@ const SinglePropertyCard = ({
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const isFavorite = favorites.includes(property.id);
+
   useEffect(() => {
     // Removed useEffect hook
   }, []);
@@ -168,6 +168,8 @@ const SinglePropertyCard = ({
 
 
   console.log('myfvrts',favorites);
+  const isFavorite = Array.isArray(favorites) && favorites.includes(property.id);
+
   
 
   return (
@@ -193,15 +195,13 @@ const SinglePropertyCard = ({
           <Button
             variant="ghost"
             size="icon"
-            className={`absolute top-4 right-4 text-white hover:text-emerald-500 transition-colors duration-300 ${
-              isFavorite ? "text-pink-500" : ""
-            }`}
+            className='absolute top-4 right-4 text-white hover:text-emerald-500 transition-colors duration-300 '
             onClick={(e) => {
               e.preventDefault();
               handleFvrtLogic(property.id)
             }}
           >
-          {isLoading ?  <ClipLoader className="h-6 w-6" /> : <Heart className="h-6 w-6" />}
+          {isLoading ?  <ClipLoader className="h-6 w-6" /> : isFavorite ? <p className="text-xl">♥️</p>:<Heart className="h-6 w-6" />}
           </Button>
           <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
             <Button
