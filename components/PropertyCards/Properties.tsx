@@ -8,6 +8,7 @@ import { ClipLoader } from "react-spinners";
 import { RefreshCw } from "lucide-react";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
+import Swal from "sweetalert2";
 
 const FallbackUI = ({ onReload }: { onReload: () => void }) => {
   return (
@@ -77,6 +78,24 @@ const Properties = () => {
   const [error, setError] = useState<string | null>(null); // State for error
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   const [timeoutError, setTimeoutError] = useState<boolean>(false);
+  const [fvrtList, setFvrtList] = useState('')
+
+  const fetchFvrts=async () =>{
+    try {
+      const response = await axios.get("/api/get-fvrt");
+      if (response.status === 200) {
+        setFvrtList(response.data);
+        
+      } else {
+        
+        setError("Failed to fetch favourites.");
+      }
+    } catch (err) {
+      
+      setError("An error occurred while fetching favourites.");
+    }
+  }
+
 
   const fetchHotels = async () => {
     setLoading(true);
@@ -93,11 +112,11 @@ const Properties = () => {
       if (response.status === 200) {
         setHotels(response.data); // Store the hotels in state
       } else {
-        console.error("Failed to fetch hotels, status:", response.status);
+        
         setError("Failed to fetch hotels.");
       }
     } catch (err) {
-      console.error("Error while fetching hotels:", err);
+      
       setError("An error occurred while fetching hotels.");
     } finally {
       setLoading(false); // Stop loading
@@ -106,6 +125,7 @@ const Properties = () => {
   };
 
   useEffect(() => {
+    fetchFvrts(); // Fetch favourites on component mount
     fetchHotels(); // Fetch hotels on component mount
   }, []);
   if (timeoutError) {

@@ -9,9 +9,9 @@ export async function doSocialLogin(formdata: FormData) {
   // Ensure action is a string
   if (typeof action === "string") {
     await signIn(action, { redirectTo: "/" });
-    console.log(action);
+    
   } else {
-    console.error("Invalid action type:", action);
+    
   }
 }
 export async function doResendLogin(formdata: FormData) {
@@ -37,7 +37,7 @@ export async function doCredentialsLogin(
 
     return response ? { ok: true, ...response } : { ok: false };
   } catch (error) {
-    console.error("Sign-in error:", error);
+    
     return null;
   }
 }

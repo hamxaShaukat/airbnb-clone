@@ -22,9 +22,7 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSignUp) {
-      // console.log(email, password, name);
       if (!email || !password || !name) {
-        console.log("first");
         Swal.fire({
           icon: "error",
           title: "Oops...",
@@ -57,9 +55,7 @@ const LoginForm = () => {
         });
       }
     } else {
-      // console.log(email, password);
       if (!email || !password) {
-        console.log("second");
         Swal.fire({
           icon: "error",
           title: "Oops...",
@@ -73,7 +69,6 @@ const LoginForm = () => {
           redirectTo: "/",
         });
         if (result?.error) {
-          console.log(result.error);
         } else {
           Swal.fire({
             icon: "success",
@@ -83,7 +78,6 @@ const LoginForm = () => {
           router.push("/");
         }
       } catch (error) {
-        console.log(error);
       }
     }
   };

@@ -108,11 +108,11 @@ export default function Insights() {
       if (response.status === 200) {
         setHotels(response.data);
       } else {
-        console.error("Failed to fetch hotels, status:", response.status);
+        
         setError("Failed to fetch hotels.");
       }
     } catch (err) {
-      console.error("Error while fetching hotels:", err);
+      
       setError("An error occurred while fetching hotels.");
     } finally {
       setLoading(false);

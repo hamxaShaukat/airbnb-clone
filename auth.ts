@@ -44,10 +44,9 @@ export const {
         const email = credentials.email as string;
         const password = credentials.password as string;
 
-        console.log("Authorize called with email:", email);
+
 
         if (!email || !password) {
-          console.log("Missing email or password");
           throw new Error("Missing email or password");
         }
 
@@ -56,7 +55,7 @@ export const {
         });
 
         if (!user) {
-          console.log("No user found with the email:", email);
+    
           throw new Error("No user found with the email");
         }
 
@@ -65,11 +64,9 @@ export const {
           user.hashedPassword
         );
         if (!isPasswordValid) {
-          console.log("Invalid password for email:", email);
           throw new Error("Invalid password");
         }
 
-        console.log("User authenticated:", user);
         return {
           id: user.id,
           name: user.name,
@@ -98,7 +95,6 @@ export const {
           token.email = updatedUser.email;
           token.role = updatedUser.role;
           token.avatar = updatedUser.avatar;
-          // console.log(token.role,token.name,token.email)
         }
       }
       return token;
@@ -115,12 +111,12 @@ export const {
     },
     async signIn({ user, account, profile, email, credentials }) {
       if (!account) {
-        console.log("signIn callback - no account");
+        
         return false;
       }
 
       if (account.provider === "credentials") {
-        console.log("signIn callback - credentials provider");
+        
         return true;
       }
 
@@ -152,7 +148,6 @@ export const {
         user.role = existingUser.role;
       }
 
-      console.log("signIn callback - successful");
       return true;
     },
   },

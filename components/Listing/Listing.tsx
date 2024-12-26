@@ -139,24 +139,7 @@ export default function AstonishingPropertyListingForm() {
     const infantRent = formData.infantRent
     const childRent = formData.childRent
     const petRent = formData.petRent
- console.log(
-   'name:', name,
-    'address:', address,
-    'city:', city,
-    'country:', country,
-    'rooms:', rooms,
-    'bedrooms:', bedrooms,
-    'washrooms:', washrooms,
-    'description:', description,
-    'category:', category,
-    'adultRent:', adultRent,
-    'infantRent:', infantRent,
-    'childRent:', childRent,
-    'petRent:', petRent,
-    'images:', images,
-    'rules:', rules,
-    'facilities:', facilities
-  );
+ 
     const response = await axios.post('/api/add-hotel',{
       name,
       address,

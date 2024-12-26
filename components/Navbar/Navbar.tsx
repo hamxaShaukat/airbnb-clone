@@ -99,7 +99,6 @@ export default function Navbar({ session }: { session: Session | null }) {
   };
 
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-  console.log("hhhhhhihihihih", session?.user);
 
   const toggleFeature = (feature: string) => {
     setSelectedFeatures((prev) =>

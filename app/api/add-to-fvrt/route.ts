@@ -100,7 +100,6 @@ export async function POST(req: NextRequest) {
       favourites: updatedUser.favorites,
     });
   } catch (error) {
-    console.error("Error while adding to favourites:", error);
     return NextResponse.json(
       {
         message: "Error while adding to favourites",

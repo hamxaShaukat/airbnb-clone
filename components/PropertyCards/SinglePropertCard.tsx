@@ -52,15 +52,18 @@ const dummyHotel: Hotel = {
 
 const SinglePropertyCard = ({
   property = dummyHotel,
+  favorites = [],
 }: {
   property?: Hotel;
-}) => {
+  favorites?: string[]; // Array of favorite property IDs
+}) =>  {
   const [currentImage, setCurrentImage] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const controls = useAnimation();
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const isFavorite = favorites.includes(property.id);
   useEffect(() => {
     // Removed useEffect hook
   }, []);
@@ -162,6 +165,9 @@ const SinglePropertyCard = ({
       setIsLoading(false); // Hide loader
     }
   };
+
+
+  console.log('myfvrts',favorites);
   
 
   return (
@@ -187,7 +193,9 @@ const SinglePropertyCard = ({
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-4 right-4 text-white hover:text-emerald-500 transition-colors duration-300"
+            className={`absolute top-4 right-4 text-white hover:text-emerald-500 transition-colors duration-300 ${
+              isFavorite ? "text-pink-500" : ""
+            }`}
             onClick={(e) => {
               e.preventDefault();
               handleFvrtLogic(property.id)

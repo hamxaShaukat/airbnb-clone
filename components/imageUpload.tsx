@@ -34,7 +34,6 @@ const ImageUpload: React.FC<DropzoneProps> = ({ onChange, label, value, disabled
       };
       reader.readAsDataURL(compressedFile);
     } catch (error) {
-      console.error('Error compressing image:', error);
     }
   }, [handleChange]);
 
