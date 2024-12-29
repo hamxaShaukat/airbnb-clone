@@ -135,7 +135,7 @@ const Properties = ({
       console.log('first => no session');
       fetchHotels(); 
     }
-  }, []);
+  }, [session]);
   if (timeoutError) {
     return <FallbackUI onReload={() => window.location.reload()} />;
   }

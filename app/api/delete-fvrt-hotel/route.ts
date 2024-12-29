@@ -28,7 +28,7 @@ export async function DELETE(request: NextRequest) {
           set: (await prisma.user.findUnique({
             where: { email: session.user.email },
             select: { favorites: true },
-          }))?.favorites.filter((fav) => fav !== id), // Remove the ID from the array
+          }))?.favorites.filter((fav:string) => fav !== id), // Remove the ID from the array
         },
       },
     });
