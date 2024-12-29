@@ -1,4 +1,3 @@
-// app/api/register/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prismadb";
 import { auth } from "@/auth";
@@ -33,6 +32,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate check-in and check-out dates
+    if (new Date(checkInDate) >= new Date(checkOutDate)) {
+      return NextResponse.json(
+        { message: "Invalid check-in and check-out dates", code: 801 },
+        { status: 400 }
+      );
+    }
+
     // Authenticate the user
     const session = await auth();
     if (!session) {
@@ -52,34 +59,53 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create booking and update hotel status in a transaction
-    const [booking] = await prisma.$transaction([
-      // Create the booking
-      prisma.booking.create({
-        data: {
-          hotelId, // Ensure this maps correctly to the Booking model
-          adults,
-          children,
-          infants,
-          pets: pets || 0,
-          checkIn: checkInDate,
-          checkOut: checkOutDate,
-          total: totalPrice,
-          userEmail: email,
-        },
-      }),
-      // Update the hotel's `isBooked` status
-      prisma.hotel.update({
-        where: { id: hotelId },
-        data: { isBooked: true },
-      }),
-    ]);
+    // Validate hotel existence
+    const hotel = await prisma.hotel.findUnique({
+      where: { id: hotelId },
+    });
+    if (!hotel) {
+      return NextResponse.json(
+        { message: "Hotel not found", code: 404 },
+        { status: 404 }
+      );
+    }
 
-    return NextResponse.json(booking);
+    // Create booking and update hotel status in a transaction
+    try {
+      const [booking] = await prisma.$transaction([
+        // Create the booking
+        prisma.booking.create({
+          data: {
+            hotelId,
+            adults,
+            children,
+            infants,
+            pets: pets || 0,
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            total: totalPrice,
+            userEmail: email,
+          },
+        }),
+        // Update the hotel's `isBooked` status
+        prisma.hotel.update({
+          where: { id: hotelId },
+          data: { isBooked: true },
+        }),
+      ]);
+
+      return NextResponse.json(booking);
+    } catch (transactionError) {
+      console.error("Transaction error:", transactionError);
+      return NextResponse.json(
+        { message: "Error processing booking", code: 500 },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("Error creating booking:", error);
     return NextResponse.json(
-      { message: "Registration error", code: 500 },
+      { message: "Something went wrong. Please try again later.", code: 500 },
       { status: 500 }
     );
   }
