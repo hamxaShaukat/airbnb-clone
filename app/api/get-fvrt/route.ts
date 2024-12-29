@@ -5,16 +5,8 @@ import { auth } from "@/auth";
 export async function GET() {
   const session = await auth();
 
-  if (!session) {
-    return new NextResponse(
-      JSON.stringify({
-        message: "You are not authenticated. Please log in first.",
-      }),
-      { status: 401 } // 401 for unauthorized
-    );
-  }
-
-  const userEmail = session.user.email;
+ 
+  const userEmail = session?.user.email;
 
   try {
     // Fetch the user from the database along with their favorites

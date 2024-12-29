@@ -9,6 +9,7 @@ import { RefreshCw } from "lucide-react";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
+import { Session } from "next-auth";
 
 const FallbackUI = ({ onReload }: { onReload: () => void }) => {
   return (
@@ -73,7 +74,9 @@ const FallbackUI = ({ onReload }: { onReload: () => void }) => {
   );
 };
 
-const Properties = () => {
+const Properties = ({
+  session
+}:{session:Session | null }) => {
   const [hotels, setHotels] = useState<Hotel[]>([]); // State for hotels
   const [error, setError] = useState<string | null>(null); // State for error
   const [loading, setLoading] = useState<boolean>(true); // State for loading
@@ -124,8 +127,14 @@ const Properties = () => {
   console.log("first", fvrtList);
 
   useEffect(() => {
-    fetchFvrts(); // Fetch favourites on component mount
-    fetchHotels(); // Fetch hotels on component mount
+    if(session){
+      console.log('session', session);
+      fetchFvrts();
+      fetchHotels(); 
+    }else{
+      console.log('first => no session');
+      fetchHotels(); 
+    }
   }, []);
   if (timeoutError) {
     return <FallbackUI onReload={() => window.location.reload()} />;
