@@ -126,21 +126,74 @@ export default function AstonishingPropertyListingForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const name = formData.name
-    const address = formData.address
-    const city = formData.city
-    const country = formData.country
-    const rooms = formData.numRooms
-    const bedrooms = formData.numBedrooms
-    const washrooms = formData.numWashrooms
-    const description = formData.description
-    const category = formData.category
-    const adultRent = formData.adultRent
-    const infantRent = formData.infantRent
-    const childRent = formData.childRent
-    const petRent = formData.petRent
- 
-    const response = await axios.post('/api/add-hotel',{
+    const name = formData.name;
+    const address = formData.address;
+    const city = formData.city;
+    const country = formData.country;
+    const rooms = formData.numRooms;
+    const bedrooms = formData.numBedrooms;
+    const washrooms = formData.numWashrooms;
+    const description = formData.description;
+    const category = formData.category;
+    const adultRent = formData.adultRent;
+    const infantRent = formData.infantRent;
+    const childRent = formData.childRent;
+    const petRent = formData.petRent;
+
+    try {
+      const response = await axios.post("/api/add-hotel", {
+        name,
+        address,
+        city,
+        country,
+        rooms,
+        bedrooms,
+        washrooms,
+        description,
+        category,
+        adultRent,
+        infantRent,
+        childRent,
+        petRent,
+        images,
+        rules,
+        facilities,
+      });
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Property Listing Created Successfully",
+          text: "Your property listing has been created!",
+        });
+        router.push("/");
+      }
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        const { code, message } = error.response.data;
+
+        switch (code) {
+          case 800:
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: message,
+            });
+            break;
+
+          case 801:
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: message,
+            });
+            break;
+
+          default:
+            break;
+        }
+      }
+    }
+    const response = await axios.post("/api/add-hotel", {
       name,
       address,
       city,
@@ -156,27 +209,27 @@ export default function AstonishingPropertyListingForm() {
       petRent,
       images,
       rules,
-      facilities
+      facilities,
     });
-    if(response.status === 200){
+    if (response.status === 200) {
       Swal.fire({
         icon: "success",
         title: "Property Listing Created Successfully",
         text: "Your property listing has been created!",
-      })
-      router.push('/')
-    } else if(response.status === 400){
+      });
+      router.push("/");
+    } else if (response.status === 400) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
         text: "Kindly Login first in order to list your property",
-      })
-    } else {
+      });
+    } else if (response.status === 402) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "An error occurred while creating your property listing",
-      })
+        text: "Kindly fill all the fields first in order to list your property",
+      });
     }
     // Handle form submission logic here
   };
@@ -383,7 +436,6 @@ export default function AstonishingPropertyListingForm() {
                       Pricing
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
                       <div>
                         <Label htmlFor="adultRent">Adult Rent</Label>
                         <Input
@@ -620,19 +672,22 @@ export default function AstonishingPropertyListingForm() {
             {currentStep < formSteps.length - 1 ? (
               <Button
                 type="button"
-                onClick={nextStep}
+                onClick={(e) => {
+                  e.preventDefault(); // Ensure no default form submission
+                  nextStep();
+                }}
                 className="bg-emerald-500 text-white hover:bg-emerald-600"
               >
                 Next
               </Button>
-            ) : currentStep === 4 ? (
+            ) : (
               <Button
                 type="submit"
                 className="bg-emerald-500 text-white hover:bg-emerald-600"
               >
                 Submit Listing
               </Button>
-            ):null}
+            )}
           </div>
         </form>
       </motion.div>

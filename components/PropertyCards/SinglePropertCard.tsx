@@ -12,6 +12,7 @@ import {
   Bath,
   Home,
   RefreshCw,
+  FishOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -20,6 +21,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { ClipLoader } from "react-spinners";
 import { useRouter } from "next/navigation";
+import useHotelId from "@/lib/features/hotelId";
 
 // Dummy data
 const dummyHotel: Hotel = {
@@ -31,6 +33,7 @@ const dummyHotel: Hotel = {
   rooms: 50,
   Bedrooms: 2,
   Washrooms: 2,
+  isBooked: false,
   description:
     "Experience luxury by the sea in our stunning resort. Enjoy breathtaking ocean views, world-class amenities, and unparalleled comfort.",
   category: "Resort",
@@ -63,6 +66,8 @@ const SinglePropertyCard = ({
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const {setHotelId} = useHotelId();
+  const arePetsAllowed = property.petRent !== undefined && property.petRent > 0;
 
   useEffect(() => {
     // Removed useEffect hook
@@ -166,10 +171,15 @@ const SinglePropertyCard = ({
     }
   };
 
-
+  const handleRouteChange = (id: string) => {
+    setHotelId(id); 
+    router.push(`/hotel/${id}`);
+  };
   console.log('myfvrts',favorites);
   const isFavorite = Array.isArray(favorites) && favorites.includes(property.id);
-
+  if(property.isBooked){
+    return;
+  }
   
 
   return (
@@ -181,6 +191,7 @@ const SinglePropertyCard = ({
       transition={{ duration: 0.3 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
+      onClick={()=>handleRouteChange(property.id)}
     >
       <motion.div className="relative w-full h-full">
         <div className="relative h-72">
@@ -266,6 +277,9 @@ const SinglePropertyCard = ({
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="bg-gray-700 text-emerald-300 rounded-full px-3 py-1 text-sm">
               {property.category}
+            </span>
+            <span className="bg-gray-700 text-emerald-300 rounded-full px-3 py-1 text-xs">
+              {arePetsAllowed ?`10$ per pet`:<div className="flex items-center gap-x-2"><FishOff className="w-5 h-5" /> No pets allowed</div>}
             </span>
           </div>
           <div className="flex justify-between items-center">

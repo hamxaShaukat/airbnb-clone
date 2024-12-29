@@ -1,8 +1,12 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, RefreshCw } from "lucide-react";
+import {
+  Trash2,
+  RefreshCw,
+  HeartOff,
+  CircleArrowOutUpRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +21,8 @@ import Swal from "sweetalert2";
 import { ClipLoader } from "react-spinners";
 import Image from "next/image";
 import { Hotel } from "@/types/types";
+import useHotelId from "@/lib/features/hotelId";
+import { useRouter } from "next/navigation";
 
 const FallbackUI = ({ onReload }: { onReload: () => void }) => {
   return (
@@ -82,7 +88,7 @@ const FallbackUI = ({ onReload }: { onReload: () => void }) => {
   );
 };
 
-export default function Insights() {
+export default function FavList() {
   const [hotelToDelete, setHotelToDelete] = useState<Hotel | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hotels, setHotels] = useState<Hotel[]>([]);
@@ -90,7 +96,13 @@ export default function Insights() {
   const [loading, setLoading] = useState<boolean>(true);
   const [deleting, setDeleting] = useState<boolean>(false);
   const [timeoutError, setTimeoutError] = useState<boolean>(false);
-
+  const [favIds,setFaveIds]=useState<string[]>()
+  const {setHotelId} = useHotelId();
+const router =useRouter();
+  const routePage = (id: string) => {
+    setHotelId(id);
+    router.push(`/hotel/${id}`);
+  }
   const fetchHotels = async () => {
     setLoading(true);
     setTimeoutError(false);
@@ -101,15 +113,34 @@ export default function Insights() {
     }, 55000);
 
     try {
-      const response = await axios.get("/api/hotels");
+      // Step 1: Fetch favorite hotel IDs
+      const favoriteResponse = await axios.get("/api/get-fvrt");
+      if (favoriteResponse.status !== 200) {
+        setError("Failed to fetch favorite list.");
+        clearTimeout(timeout);
+        // setLoading(false);
+        return;
+      }
+      const favoriteIds: string[] = favoriteResponse.data?.favorites || [];
+      setFaveIds(favoriteIds)
+      // Step 2: Fetch all hotels
+      const hotelsResponse = await axios.get("/api/hotels");
       clearTimeout(timeout);
-      if (response.status === 200) {
-        setHotels(response.data);
+
+      if (hotelsResponse.status === 200) {
+        const allHotels: Hotel[] = hotelsResponse.data;
+
+        // Step 3: Filter hotels based on favorite IDs
+        const favoriteHotels = allHotels.filter((hotel) =>
+          favoriteIds.includes(hotel.id)
+        );
+
+        setHotels(favoriteHotels);
       } else {
         setError("Failed to fetch hotels.");
       }
     } catch (err) {
-      setError("An error occurred while fetching hotels.");
+      setError("An error occurred while fetching data.");
     } finally {
       setLoading(false);
       clearTimeout(timeout);
@@ -119,7 +150,7 @@ export default function Insights() {
   const handleDeleteClick = async (id: string) => {
     setDeleting(true);
     try {
-      const response = await axios.delete("/api/delete-hotel", {
+      const response = await axios.delete("/api/delete-fvrt-hotel", {
         data: { id: id },
       });
       if (response.status === 200) {
@@ -130,6 +161,7 @@ export default function Insights() {
           timer: 1500,
         });
         setHotels((prevHotels) => prevHotels.filter((h) => h.id !== id));
+        window.location.reload();
       } else {
         Swal.fire({
           icon: "error",
@@ -154,6 +186,32 @@ export default function Insights() {
   useEffect(() => {
     fetchHotels();
   }, []);
+
+
+  if (loading) {
+    console.log('hjjhjhjhjhjhjj')
+    return (
+      <div className="flex h-screen bg-gray-800 flex-col items-center justify-center gap-y-6">
+       <ClipLoader color="#4ade80" size={50} />
+      </div>
+    );
+  }
+
+  if (hotels.length === 0) {
+    return (
+      <div className="flex bg-gray-800 h-screen flex-col items-center justify-center gap-y-6">
+        <span className="text-red-400">
+          <HeartOff className="h-12 w-12" />
+        </span>
+        <p className="text-center text-3xl font-black text-white">
+          No favorite hotels found.
+        </p>
+        <p className="text-center text-emerald-400">
+          Add some favorites to see your list.
+        </p>
+      </div>
+    );
+  }
 
   if (timeoutError) {
     return <FallbackUI onReload={() => window.location.reload()} />;
@@ -192,18 +250,31 @@ export default function Insights() {
                     {hotel.name}
                   </span>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    setHotelToDelete(hotel);
-                    setIsDialogOpen(true);
-                  }}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
+                <div className="flex gap-x-4 items-center">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      setHotelToDelete(hotel);
+                      setIsDialogOpen(true);
+                    }}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      routePage(hotel.id);
+                    }}
+                    className="bg-gray-600 hover:bg-gray-700"
+                  >
+                    <CircleArrowOutUpRight className="h-4 w-4 mr-2" />
+                    Visit
+                  </Button>
+                </div>
               </motion.li>
             ))}
           </AnimatePresence>

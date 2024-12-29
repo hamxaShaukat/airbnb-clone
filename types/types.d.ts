@@ -11,6 +11,7 @@ export interface Hotel {
     description: string;
     category: string;
     averageRating?: number;
+    isBooked: boolean;
     images: string[];
     rules: string[];
     facilities: string[];

@@ -8,17 +8,19 @@ datasource db {
 }
 
 model User {
-  id             String         @id @default(auto()) @map("_id") @db.ObjectId
-  email          String         @unique
-  name           String?
-  hashedPassword String
-  role           String?
-  phone          String?
-  avatar         String?
-  favorites      String[]
-  hotels         Hotel[]
-  reviews        Review[]
-  notifications  Notification[]
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  email           String         @unique
+  name            String?
+  hashedPassword  String
+  role            String?
+  phone           String?
+  avatar          String?
+  hasNotification Boolean?       @default(false)
+  favorites       String[]
+  hotels          Hotel[]
+  reviews         Review[]
+  notifications   Notification[]
+  Booking         Booking[]
 }
 
 model Hotel {
@@ -39,10 +41,12 @@ model Hotel {
   adultRent     Int?
   childrenRent  Int?
   infantsRent   Int?
+  isBooked      Boolean  @default(false)
   petRent       Int?
   reviews       Review[]
   user          User?    @relation(fields: [userEmail], references: [email])
   userEmail     String
+  // Booking       Booking[]
 }
 
 model Review {
@@ -66,4 +70,20 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Booking {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userEmail String
+  hotelId   String   @db.ObjectId
+  checkIn   DateTime
+  checkOut  DateTime
+  adults    Int?
+  children  Int?
+  infants   Int?
+  pets      Int?
+
+  total Float
+  // hotel     Hotel    @relation(fields: [hotelId], references: [id])
+  user  User  @relation(fields: [userEmail], references: [email])
 }

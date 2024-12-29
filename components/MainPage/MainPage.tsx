@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
@@ -20,96 +20,11 @@ import {
   Dog,
 } from "lucide-react";
 import Image from "next/image";
-
-const images = [
-  "/assets/ph1.jpg",
-  "/assets/ph2.jpg",
-  "/assets/ph3.jpg",
-  "/assets/ph4.jpg",
-  "/assets/ph5.jpg",
-];
-
-const reviews = [
-  {
-    id: 1,
-    author: "John Doe",
-    rating: 5,
-    comment: "Excellent property, highly recommended!",
-  },
-  {
-    id: 2,
-    author: "Jane Smith",
-    rating: 4,
-    comment: "Great location and amenities.",
-  },
-  {
-    id: 3,
-    author: "Mike Johnson",
-    rating: 5,
-    comment: "Fantastic experience, will definitely come back.",
-  },
-  {
-    id: 4,
-    author: "Sarah Brown",
-    rating: 4,
-    comment: "Very comfortable and clean.",
-  },
-  {
-    id: 5,
-    author: "Chris Lee",
-    rating: 5,
-    comment: "Amazing views and excellent service.",
-  },
-  {
-    id: 6,
-    author: "Emily Davis",
-    rating: 4,
-    comment: "Lovely property with great facilities.",
-  },
-  {
-    id: 7,
-    author: "David Wilson",
-    rating: 5,
-    comment: "Perfect for a family vacation.",
-  },
-  {
-    id: 8,
-    author: "Lisa Taylor",
-    rating: 4,
-    comment: "Enjoyed our stay, minor issues but overall good.",
-  },
-  {
-    id: 9,
-    author: "Robert Anderson",
-    rating: 5,
-    comment: "Exceptional property and host.",
-  },
-  {
-    id: 10,
-    author: "Jennifer White",
-    rating: 4,
-    comment: "Beautiful location, slightly overpriced.",
-  },
-];
-
-const rules = [
-  "Check-in time is 2:00 PM",
-  "Check-out time is 11:00 AM",
-  "No smoking inside the property",
-  "No parties or events",
-  "Pets allowed (with additional fee)",
-];
-
-const facilities = [
-  "Free Wi-Fi",
-  "Air conditioning",
-  "Fully equipped kitchen",
-  "Washing machine",
-  "Private parking",
-  "Swimming pool",
-  "Gym",
-  "BBQ area",
-];
+import Swal from "sweetalert2";
+import axios from "axios";
+import useHotelId from "@/lib/features/hotelId";
+import { Hotel } from "@/types/types";
+import { ClipLoader } from "react-spinners";
 
 export default function PropertyDetails() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -123,23 +38,103 @@ export default function PropertyDetails() {
       setLoaded(true);
     },
   });
+  const { hotelId } = useHotelId();
+  const [loading, setLoading] = useState(false);
+  const [hotel, setHotel] = useState<Hotel>();
 
+  let arePets;
+  if (hotel?.petRent === 0) {
+    arePets = false;
+  } else {
+    arePets = true;
+  }
+
+  const getData = async () => {
+    setLoading(true);
+    const data = localStorage.getItem("hotelId-storage");
+    let hId = ""; // Initialize hId to ensure it's in scope
+
+    if (data) {
+      const parsedData = JSON.parse(data);
+      hId = parsedData.state.hotelId; // Assign extracted ID to hId
+      console.log("Extracted hId:", hId); // Debugging log
+    }
+
+    try {
+      const response = await axios.post(`/api/get-booking-hotel`, {
+        hId,
+      });
+      if (response.status === 200) {
+        setHotel(response.data.hotel);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleBook = async () => {
+    setLoading(true);
+    try {
+      // call your booking API
+      const response = await axios.post(`/api/add-booking`);
+      if (response.status === 200) {
+        Swal.fire({
+          title: "Booking successful!",
+          icon: "success",
+        });
+      } else {
+        Swal.fire({
+          title: "Booking failed!",
+          icon: "error",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to book, please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
   const [guests, setGuests] = useState({
     adults: 1,
     children: 0,
     infants: 0,
     pets: 0,
   });
+  const [numberOfdays, setNumberOfDays] = useState(1);
 
+  const handleDaysChange = (value: number) => {
+    setNumberOfDays(Math.max(1, value));
+  };
+
+  const totalPrice =
+    (hotel?.adultRent || 0) +
+    guests.children * (hotel?.childrenRent || 0) +
+    guests.infants * (hotel?.infantsRent || 0) +
+    guests.pets * (hotel?.petRent || 0);
+
+  const totalPriceAfterDay = totalPrice * numberOfdays;
   const handleGuestChange = (type: keyof typeof guests, value: number) => {
     setGuests((prev) => ({ ...prev, [type]: Math.max(0, value) }));
   };
+  useEffect(() => {
+    getData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-gray-800 flex justify-center items-center h-screen">
+        <ClipLoader color="#16a085" />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-900 text-gray-100">
       <div className="relative">
         <div ref={sliderRef} className="keen-slider rounded-lg overflow-hidden">
-          {images.map((src, idx) => (
+          {hotel?.images.map((src, idx) => (
             <div key={idx} className="keen-slider__slide">
               <Image
                 src={src}
@@ -184,29 +179,35 @@ export default function PropertyDetails() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="border-b border-gray-700 pb-4"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold">{review.author}</h3>
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < review.rating
-                                ? "text-yellow-400 fill-yellow-400"
-                                : "text-gray-400"
-                            }`}
-                          />
-                        ))}
+                {hotel?.reviews === undefined ? (
+                  <p>No reviews available.</p> // Render this if reviews are undefined
+                ) : (
+                  hotel.reviews.map((review) => (
+                    <div
+                      key={review.id}
+                      className="border-b border-gray-700 pb-4"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-semibold">
+                          {review.userEmail ?? "anonymous"}
+                        </h3>
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? "text-yellow-400 fill-yellow-400"
+                                  : "text-gray-400"
+                              }`}
+                            />
+                          ))}
+                        </div>
                       </div>
+                      <p className="text-gray-300">{review.comment}</p>
                     </div>
-                    <p className="text-gray-300">{review.comment}</p>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -226,36 +227,45 @@ export default function PropertyDetails() {
                     <Bed className="h-5 w-5 mr-2" />
                     <span>Beds</span>
                   </div>
-                  <span>4</span>
+                  <span>{hotel?.Bedrooms}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <Shower className="h-5 w-5 mr-2" />
                     <span>Bathrooms</span>
                   </div>
-                  <span>4</span>
+                  <span>{hotel?.Washrooms}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <DollarSign className="h-5 w-5 mr-2" />
                     <span>Price per Adult</span>
                   </div>
-                  <span>$89</span>
+                  <span>{hotel?.adultRent}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <DollarSign className="h-5 w-5 mr-2" />
                     <span>Price per Child</span>
                   </div>
-                  <span>$80</span>
+                  <span>{hotel?.childrenRent}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <DollarSign className="h-5 w-5 mr-2" />
                     <span>Price per Infant</span>
                   </div>
-                  <span>$0</span>
+                  <span>{hotel?.infantsRent}</span>
                 </div>
+                {arePets ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <DollarSign className="h-5 w-5 mr-2" />
+                      <span>Price per pet</span>
+                    </div>
+                    <span>{hotel?.petRent}</span>
+                  </div>
+                ) : null}
               </div>
 
               <div className="mt-6 space-y-4">
@@ -399,6 +409,52 @@ export default function PropertyDetails() {
                     </Button>
                   </div>
                 </div>
+                <div>
+                  <Label htmlFor="days">Days</Label>
+                  <div className="flex items-center mt-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="bg-emerald-500 text-black"
+                      onClick={() => handleDaysChange(numberOfdays - 1)}
+                    >
+                      -
+                    </Button>
+                    <Input
+                      id="days"
+                      type="number"
+                      value={numberOfdays}
+                      onChange={(e) =>
+                        handleDaysChange(parseInt(e.target.value) || 1)
+                      } // Default to 1 if input is invalid
+                      className="mx-2 w-40 text-center bg-gray-700 border-gray-600"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="bg-emerald-500 text-black"
+                      onClick={() => handleDaysChange(numberOfdays + 1)}
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between items-center mt-6">
+                <div className="flex items-center">
+                  <Users className="h-5 w-5 mr-2" />
+                  <span>Total Guests</span>
+                </div>
+                <span>{guests.adults + guests.children + guests.infants}</span>
+              </div>
+              <div className="flex justify-between items-center mt-6">
+                <div className="flex items-center">
+                  <DollarSign className="h-5 w-5 mr-2" />
+                  <span>Total Price</span>
+                </div>
+                <span>{totalPriceAfterDay}</span>
               </div>
               <div className="w-full pt-14">
                 <Button className="w-full bg-emerald-500 text-black">
@@ -417,7 +473,7 @@ export default function PropertyDetails() {
           </CardHeader>
           <CardContent>
             <ul className="list-disc list-inside space-y-2">
-              {rules.map((rule, index) => (
+              {hotel?.rules.map((rule, index) => (
                 <li key={index}>{rule}</li>
               ))}
             </ul>
@@ -430,7 +486,7 @@ export default function PropertyDetails() {
           </CardHeader>
           <CardContent>
             <ul className="list-disc list-inside space-y-2">
-              {facilities.map((facility, index) => (
+              {hotel?.facilities.map((facility, index) => (
                 <li key={index}>{facility}</li>
               ))}
             </ul>
