@@ -85,7 +85,7 @@ export default function PropertyDetails() {
     const id = hotel?.id;
     try {
       // call your booking API
-      const response = await axios.post(`/api/add-booking`, {
+      const response = await axios.post(`/api/my-add-booking`, {
         hotelId: id,
         adults: guests.adults,
         children: guests.children,
