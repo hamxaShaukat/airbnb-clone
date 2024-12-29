@@ -1,32 +1,32 @@
 <Dialog>
-  <DialogTrigger>
-    <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-8 py-6 text-lg rounded-xl transform transition-all duration-300 hover:scale-105">
-      Start Hosting Today
-    </Button>
-  </DialogTrigger>
-  <DialogContent className="border-2 border-emerald-600">
-    <DialogHeader>
-      <DialogTitle>Do you want to become a Host?</DialogTitle>
-      <DialogDescription>
-        <Separator className="border border-emerald-500 my-6" />
-        <p>
-          We are deeply committed to providing top-quality services to our
-          customers. Therefore, we kindly request your cooperation in
-          maintaining and promoting the best living standards for our guests. We
-          trust that you will uphold this commitment and not breach our trust.
-        </p>
-        <p>
-          <span className="text-lg font-semibold text-emerald-400">
-            Please note:{" "}
-          </span>
-          If your hotel has a <b>rating</b> lower than 3, it will be removed
-          from our server. Kindly keep this in mind.
-        </p>
-      </DialogDescription>
-    </DialogHeader>
-    <Separator className="border border-emerald-500 my-6" />
-    <DialogFooter>
-      <Button className="bg-emerald-500">I agree</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>;
+      <DialogTrigger asChild>
+      <Button className="w-full bg-emerald-500 text-black">
+                  Book Now
+                </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit profile</DialogTitle>
+          <DialogDescription>
+            Make changes to your profile here. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
+            <Input id="name" value="Pedro Duarte" className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="username" className="text-right">
+              Username
+            </Label>
+            <Input id="username" value="@peduarte" className="col-span-3" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit">Save changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, RefreshCw } from "lucide-react";
+import { Trash2, RefreshCw, CircleCheckBig, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -192,18 +192,37 @@ export default function Insights() {
                     {hotel.name}
                   </span>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    setHotelToDelete(hotel);
-                    setIsDialogOpen(true);
-                  }}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
+
+                <div className="flex justify-between items-center gap-x-2">
+                  {/* Delete Button */}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      setHotelToDelete(hotel);
+                      setIsDialogOpen(true);
+                    }}
+                    className="bg-red-600 hover:bg-red-700 flex items-center justify-center w-32"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+
+                  {/* Status Button */}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={true}
+                    className={`flex items-center justify-center w-32 ${
+                      hotel.isBooked ? "bg-green-600" : "bg-yellow-600"
+                    }`}
+                  >
+                    
+                    {hotel.isBooked ?  <CircleCheckBig className="h-4 w-4 mr-2" /> :  <Ban className="h-4 w-4 mr-2" />}
+                   
+                    {hotel.isBooked ? "Booked" : "Desolated"}
+                  </Button>
+                </div>
               </motion.li>
             ))}
           </AnimatePresence>

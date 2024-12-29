@@ -18,6 +18,8 @@ import {
   Users,
   Baby,
   Dog,
+  CalendarDays,
+  Calendar,
 } from "lucide-react";
 import Image from "next/image";
 import Swal from "sweetalert2";
@@ -25,6 +27,15 @@ import axios from "axios";
 import useHotelId from "@/lib/features/hotelId";
 import { Hotel } from "@/types/types";
 import { ClipLoader } from "react-spinners";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function PropertyDetails() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -42,13 +53,8 @@ export default function PropertyDetails() {
   const [loading, setLoading] = useState(false);
   const [hotel, setHotel] = useState<Hotel>();
 
-  let arePets;
-  if (hotel?.petRent === 0) {
-    arePets = false;
-  } else {
-    arePets = true;
-  }
-
+  let arePetsAllowed = hotel?.petRent !== undefined && hotel?.petRent > 0;
+  console.log("yes", arePetsAllowed);
   const getData = async () => {
     setLoading(true);
     const data = localStorage.getItem("hotelId-storage");
@@ -75,9 +81,20 @@ export default function PropertyDetails() {
   };
   const handleBook = async () => {
     setLoading(true);
+    handleCheckOutDateChange(checkInDate);
+    const id = hotel?.id;
     try {
       // call your booking API
-      const response = await axios.post(`/api/add-booking`);
+      const response = await axios.post(`/api/add-booking`, {
+        hotelId: id,
+        adults: guests.adults,
+        children: guests.children,
+        infants: guests.infants,
+        pets: guests.pets,
+        checkInDate: checkInDate,
+        checkOutDate: checkOutDate,
+        totalPrice: totalPriceAfterDay,
+      });
       if (response.status === 200) {
         Swal.fire({
           title: "Booking successful!",
@@ -103,11 +120,36 @@ export default function PropertyDetails() {
     pets: 0,
   });
   const [numberOfdays, setNumberOfDays] = useState(1);
+  const [checkOutDate, setCheckOutDate] = useState("");
+  const [checkInDate, setCheckInDate] = useState("");
+
+  const handleCheckOutDateChange = (value: string) => {
+    if (!value) {
+      console.error("Invalid date value");
+      return;
+    }
+
+    const checkoutDate = new Date(value); // Parse the input value as a Date
+    // const checkindate = new Date(value); // Parse the input value as a Date
+
+    if (isNaN(checkoutDate.getTime())) {
+      console.error("Invalid date format");
+      return;
+    }
+
+    checkoutDate.setDate(checkoutDate.getDate() + numberOfdays); // Add the number of days
+    // checkindate.setDate(checkindate.getDate())
+    // Format the date as "YYYY-MM-DD" and update the state
+    setCheckOutDate(checkoutDate.toISOString().split("T")[0]);
+    // setCheckInDate(checkindate.toISOString().split("T")[0]);
+  };
+
+  const handleDate = () => handleCheckOutDateChange(checkInDate);
 
   const handleDaysChange = (value: number) => {
     setNumberOfDays(Math.max(1, value));
   };
-
+  console.log(checkInDate,checkOutDate)
   const totalPrice =
     (hotel?.adultRent || 0) +
     guests.children * (hotel?.childrenRent || 0) +
@@ -257,7 +299,7 @@ export default function PropertyDetails() {
                   </div>
                   <span>{hotel?.infantsRent}</span>
                 </div>
-                {arePets ? (
+                {arePetsAllowed ? (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <DollarSign className="h-5 w-5 mr-2" />
@@ -265,7 +307,9 @@ export default function PropertyDetails() {
                     </div>
                     <span>{hotel?.petRent}</span>
                   </div>
-                ) : null}
+                ) : (
+                  ""
+                )}
               </div>
 
               <div className="mt-6 space-y-4">
@@ -377,38 +421,46 @@ export default function PropertyDetails() {
                     </Button>
                   </div>
                 </div>
-                <div>
-                  <Label htmlFor="pets">Pets</Label>
-                  <div className="flex items-center mt-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="bg-emerald-500 text-black"
-                      onClick={() => handleGuestChange("pets", guests.pets - 1)}
-                    >
-                      -
-                    </Button>
-                    <Input
-                      id="pets"
-                      type="number"
-                      value={guests.pets}
-                      onChange={(e) =>
-                        handleGuestChange("pets", parseInt(e.target.value))
-                      }
-                      className="mx-2 w-40 text-center bg-gray-700 border-gray-600"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="bg-emerald-500 text-black"
-                      onClick={() => handleGuestChange("pets", guests.pets + 1)}
-                    >
-                      +
-                    </Button>
+                {arePetsAllowed ? (
+                  <div>
+                    <Label htmlFor="pets">Pets</Label>
+                    <div className="flex items-center mt-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="bg-emerald-500 text-black"
+                        onClick={() =>
+                          handleGuestChange("pets", guests.pets - 1)
+                        }
+                      >
+                        -
+                      </Button>
+                      <Input
+                        id="pets"
+                        type="number"
+                        value={guests.pets}
+                        onChange={(e) =>
+                          handleGuestChange("pets", parseInt(e.target.value))
+                        }
+                        className="mx-2 w-40 text-center bg-gray-700 border-gray-600"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="bg-emerald-500 text-black"
+                        onClick={() =>
+                          handleGuestChange("pets", guests.pets + 1)
+                        }
+                      >
+                        +
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  ""
+                )}
                 <div>
                   <Label htmlFor="days">Days</Label>
                   <div className="flex items-center mt-1">
@@ -427,7 +479,7 @@ export default function PropertyDetails() {
                       value={numberOfdays}
                       onChange={(e) =>
                         handleDaysChange(parseInt(e.target.value) || 1)
-                      } // Default to 1 if input is invalid
+                      }
                       className="mx-2 w-40 text-center bg-gray-700 border-gray-600"
                     />
                     <Button
@@ -457,9 +509,94 @@ export default function PropertyDetails() {
                 <span>{totalPriceAfterDay}</span>
               </div>
               <div className="w-full pt-14">
-                <Button className="w-full bg-emerald-500 text-black">
-                  Book Now
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button disabled={hotel?.isBooked} className="w-full bg-emerald-500 text-black">
+                      {hotel?.isBooked?'Already book':'Book Now'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Finaliz your Check in</DialogTitle>
+                      <DialogDescription>
+                        Make sure to <b> review </b>your <b>booking</b> details
+                        before continuing. And make sure to pay{" "}
+                        <b>dues for your booking</b> while recieving keys or you
+                        will not be able to get keys.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col items-center gap-4 py-4">
+                      <div className="flex justify-between items-center w-full">
+                        <span className="flex gap-x-2">
+                          <Users className="h-5 w-5 mr-2" />
+                          Total Guests
+                        </span>
+                        <span>
+                          {guests.adults + guests.children + guests.infants}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center w-full">
+                        <span className="flex gap-x-2">
+                          <CalendarDays className="h-5 w-5 mr-2" />
+                          Number of days
+                        </span>
+                        <span>{numberOfdays}</span>
+                      </div>
+                      <div className="flex justify-between items-center w-full">
+                        <span className="flex gap-x-2">
+                          <DollarSign className="h-5 w-5 mr-2" />
+                          Total Price
+                        </span>
+                        <span>{totalPriceAfterDay}</span>
+                      </div>
+                     
+                      {checkInDate === "" ? (
+                        <div className="flex justify-between items-center w-full">
+                          <span className="flex gap-x-2">
+                            <Calendar className="h-5 w-5 mr-2" />
+                            Check in
+                          </span>
+                          <span>
+                            <Input
+                              type="date"
+                              value={checkInDate}
+                              onChange={(e) => {
+                                setCheckInDate(e.target.value);
+                                handleCheckOutDateChange(e.target.value);
+                              }}
+                            />
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-center w-full">
+                        <span className="flex gap-x-2">
+                          <Calendar className="h-5 w-5 mr-2" />
+                          check in
+                        </span>
+                        <span>{checkInDate}</span>
+                      </div>
+                      )}
+                       <div className="flex justify-between items-center w-full">
+                        <span className="flex gap-x-2">
+                          <Calendar className="h-5 w-5 mr-2" />
+                          check out
+                        </span>
+                        <span>{checkOutDate}</span>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleBook();
+                        }}
+                      >
+                        Save changes
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>

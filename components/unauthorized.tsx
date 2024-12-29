@@ -70,7 +70,7 @@ export default function UnauthorizedPage() {
           transition={{ delay: 0.4 }}
           className="text-xl md:text-2xl text-gray-400 mb-8"
         >
-          Oops! It seems you don&spos;t have permission to view this page.
+          Oops! It seems you don&apos;t have permission to view this page.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 50 }}

@@ -76,14 +76,13 @@ model Booking {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userEmail String
   hotelId   String   @db.ObjectId
-  checkIn   DateTime
-  checkOut  DateTime
+  checkIn   String?
+  checkOut  String?
   adults    Int?
   children  Int?
   infants   Int?
   pets      Int?
-
-  total Float
+  total     Float
   // hotel     Hotel    @relation(fields: [hotelId], references: [id])
-  user  User  @relation(fields: [userEmail], references: [email])
+  user      User     @relation(fields: [userEmail], references: [email])
 }
