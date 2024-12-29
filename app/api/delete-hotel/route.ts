@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { auth } from '@/auth';
-import prisma from '@/lib/prismadb';
+import {prisma} from '@/lib/prismadb';
 
 export async function DELETE(request: NextRequest) {
   const session = await auth();
