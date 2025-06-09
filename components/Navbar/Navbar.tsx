@@ -502,6 +502,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                           <Image
                             src={session?.user?.image ?? ""}
                             alt="logo"
+                            className='rounded-full'
                             height={30}
                             width={30}
                           />

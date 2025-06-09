@@ -11,7 +11,16 @@ import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { Session } from "next-auth";
 
-const FallbackUI = ({ onReload }: { onReload: () => void }) => {
+// ✅ Accept custom message in fallback UI
+const FallbackUI = ({
+  onReload,
+  message = "The page is taking a while to load. Please try reloading.",
+  title = "Oops! Taking longer than expected.",
+}: {
+  onReload: () => void;
+  message?: string;
+  title?: string;
+}) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 overflow-hidden">
       <motion.div
@@ -53,11 +62,9 @@ const FallbackUI = ({ onReload }: { onReload: () => void }) => {
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          Oops! Taking longer than expected.
+          {title}
         </motion.h1>
-        <p className="text-xl text-emerald-400 mb-8">
-          The page is taking a while to load. Please try reloading.
-        </p>
+        <p className="text-xl text-emerald-400 mb-8">{message}</p>
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Button
             variant="default"
@@ -74,13 +81,13 @@ const FallbackUI = ({ onReload }: { onReload: () => void }) => {
   );
 };
 
-const Properties = ({
-  session
-}:{session:Session | null }) => {
-  const [hotels, setHotels] = useState<Hotel[]>([]); // State for hotels
-  const [error, setError] = useState<string | null>(null); // State for error
-  const [loading, setLoading] = useState<boolean>(true); // State for loading
+const Properties = ({ session }: { session: Session | null }) => {
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [timeoutError, setTimeoutError] = useState<boolean>(false);
+
+  const [emptyHotels, setEmptyHotels] = useState<boolean>(false); // ✅ New state
   const [fvrtList, setFvrtList] = useState([]);
 
   const fetchFvrts = async () => {
@@ -103,6 +110,7 @@ const Properties = ({
   const fetchHotels = async () => {
     setLoading(true);
     setTimeoutError(false);
+    setEmptyHotels(false); // ✅ Reset before fetch
 
     const timeout = setTimeout(() => {
       setTimeoutError(true);
@@ -113,31 +121,46 @@ const Properties = ({
       const response = await axios.get("/api/hotels");
       clearTimeout(timeout);
       if (response.status === 200) {
-        setHotels(response.data); // Store the hotels in state
+        const data = response.data;
+        if (Array.isArray(data) && data.length === 0) {
+          setEmptyHotels(true); // ✅ Set if empty
+        } else {
+          setHotels(data);
+        }
       } else {
         setError("Failed to fetch hotels.");
       }
     } catch (err) {
       setError("An error occurred while fetching hotels.");
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
       clearTimeout(timeout);
     }
   };
-  console.log("first", fvrtList);
 
   useEffect(() => {
-    if(session){
-      console.log('session', session);
+    if (session) {
       fetchFvrts();
-      fetchHotels(); 
-    }else{
-      console.log('first => no session');
-      fetchHotels(); 
+      fetchHotels();
+    } else {
+      fetchHotels();
     }
   }, [session]);
+
+  // ✅ Show timeout error UI
   if (timeoutError) {
     return <FallbackUI onReload={() => window.location.reload()} />;
+  }
+
+  // ✅ Show no hotels UI
+  if (!loading && emptyHotels) {
+    return (
+      <FallbackUI
+        onReload={() => window.location.reload()}
+        title="No Hotels Found"
+        message="It looks like no hotels have been posted yet. Please check back later!"
+      />
+    );
   }
 
   return (
