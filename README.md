@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🏠 AirBnB Clone - Role-Based Booking Platform  
 
-## Getting Started
+*A full-stack Next.js application mimicking AirBnB's core functionality with 3-tier role access (Guest/Host/Admin).*  
 
-First, run the development server:
 
+## ▶ **Video Demo**  
+🎥 **[Watch Walkthrough](https://youtube.com/your-link)** *(Show booking flow, host dashboard, and admin controls)*  
+
+---
+
+## ✨ **Key Features**  
+- **Role-Based Access (RBA)**:  
+  - **Guests**: Browse and book hotels.  
+  - **Hosts**: List properties + book other hotels.  
+  - **Admins**: Book hotels + delete suspicious listings.  
+- **Moderation**:  
+  - Hosts can delete their own listings.  
+  - Admins can remove any property.  
+- **Dynamic UI**:  
+  - Booked hotels are hidden from the main page.  
+- **Auth**: Google/GitHub login via NextAuth.js.  
+
+---
+
+## 🛠️ **Tech Stack**  
+- **Frontend**: Next.js, TailwindCSS  
+- **Backend**: Next.js API Routes  
+- **Database**: MongoDB (Prisma Orm)  
+- **Auth**: NextAuth.js (JWT + OAuth)  
+- **State Management**: Zustand  
+
+---
+
+## 🚀 **Local Setup**  
+
+### **1. Clone & Install**  
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-repo/airbnb-clone.git
+cd airbnb-clone
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### **2. Environment Variables**  
+Create a `.env` file in the root and add:  
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXTAUTH_JWT_SECRET="your_jwt_secret"
+NEXTAUTH_SECRET="your_nextauth_secret"
+DATABASE_URL="mongodb_connection_uri"
+AUTH_GOOGLE_ID="your_google_client_id"
+AUTH_GOOGLE_SECRET="your_google_secret"
+AUTH_GITHUB_ID="your_github_client_id"
+AUTH_GITHUB_SECRET="your_github_secret"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+#### 🔑 **How to Get These Keys**  
+- **NextAuth Secrets**:  
+  - Generate via terminal:  
+    ```bash
+    openssl rand -base64 32  # For NEXTAUTH_JWT_SECRET and NEXTAUTH_SECRET
+    ```  
+- **MongoDB URI**:  
+  - Create a free cluster on [MongoDB Atlas](https://www.mongodb.com/atlas/database).  
+- **Google OAuth**:  
+  - Visit [Google Cloud Console](https://console.cloud.google.com/apis/credentials), create OAuth 2.0 credentials, and add `http://localhost:3000/api/auth/callback/google` as a redirect URI.  
+- **GitHub OAuth**:  
+  - Under [GitHub Developer Settings](https://github.com/settings/developers), create a new OAuth App with callback URL `http://localhost:3000/api/auth/callback/github`.  
 
-## Learn More
+### **3. Run the App**  
+```bash
+npm run dev
+```
+Open `http://localhost:3000` in your browser.  
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛑 **Planned Improvements**  
+- [ ] **Hosts**: Allow deletion of their own listings.  
+- [ ] **Admins**: Streamline suspicious content removal.  
+- [ ] **UX**: Hide booked hotels from search results.  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 💡 **Challenges & Solutions**  
+- **Challenge**: Role-based route protection.  
+  **Solution**: Implemented middleware to validate user roles before API access.  
+- **Challenge**: Real-time booking updates.  
+  **Solution**: Used MongoDB hooks to refresh UI on booking changes.  
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## 📜 **License**  
+MIT  
+
+## 📩 **Contact**  
+Email: **hamzashaukat714@gmail.com**
