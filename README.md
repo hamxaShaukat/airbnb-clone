@@ -35,7 +35,7 @@
 
 ### **1. Clone & Install**  
 ```bash
-git clone https://github.com/your-repo/airbnb-clone.git
+git clone https://github.com/hamxaShaukat/airbnb-clone.git
 cd airbnb-clone
 npm install
 ```
