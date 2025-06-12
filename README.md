@@ -4,7 +4,7 @@
 
 
 ## ▶ **Video Demo**  
-🎥 **[Watch Walkthrough](https://youtube.com/your-link)** *(Show booking flow, host dashboard, and admin controls)*  
+🎥 **[Watch Walkthrough](https://youtu.be/XWJ-2g1s3Sk?feature=shared)** *(Show booking flow, host dashboard, and admin controls)*  
 
 ---
 
